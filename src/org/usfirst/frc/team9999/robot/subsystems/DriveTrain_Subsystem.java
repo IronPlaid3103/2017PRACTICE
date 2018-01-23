@@ -34,11 +34,24 @@ public class DriveTrain_Subsystem extends Subsystem {
 		 If zero, no blocking or checking is performed.*/
 		 port.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
 		 starboard.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+		 /* set the peak and nominal outputs, 12V means full */
+		 port.configNominalOutputForward(1, 10); //probably want to try 12v here, but this is copied from the manual
+		 port.configNominalOutputReverse(-1, 10);
+		 port.configPeakOutputForward(1, 10);
+		 starboard.configNominalOutputForward(0, 10);
+		 starboard.configNominalOutputReverse(0, 10);
+		 starboard.configPeakOutputForward(1, 10);
 		 //Inversion
 		 port.setInverted(false);
 		 port_slave.setInverted(true);
 		 starboard.setInverted(false);
 		 starboard_slave.setInverted(true);
+		 //Config PID
+		 port.selectProfileSlot(0, 10);
+		 port.config_kF(0, 0, 10); //Feed-Foward Gain (This is only found in motion profiling apps
+		 port.config_kP(0, 0, 10); //These are the regular PID gains
+		 port.config_kI(0, 0, 10);
+		 port.config_kD(0, 0, 10);
 		 //Follow
 		 starboard_slave.follow(starboard);
 		 port_slave.follow(port);
@@ -47,7 +60,18 @@ public class DriveTrain_Subsystem extends Subsystem {
 		 SmartDashboard.putNumber("RPM Starboard", starboard.getSelectedSensorVelocity(0));
 	 }
 	 public void teleopDrive(XboxController control) {
-		 mainWCD.arcadeDrive(control.getX(), control.getY(), false);
+		 mainWCD.arcadeDrive(control.getRawAxis(1), control.getRawAxis(5), false);
+		 //we need to set a mode to follow motion magic here ex. port.setMode(ControlMode.MotionMagic, something);
+		 /*"Bang-Bang Control"
+		 if(port.getActiveTrajectoryVelocity() > starboard.getActiveTrajectoryVelocity()) {
+			 starboard.set(starboard.getActiveTrajectoryVelocity() + (port.getActiveTrajectoryVelocity() - starboard.getActiveTrajectoryVelocity()));
+		 }
+		 else if (starboard.getActiveTrajectoryVelocity() > port.getActiveTrajectoryVelocity()) {
+			 port.set(port.getActiveTrajectoryVelocity() + (starboard.getActiveTrajectoryVelocity() - port.getActiveTrajectoryVelocity()));
+		 }
+		 */
+		 //Find a way to use pid & motion magic to make the drivetrain straight IN TELEOP, people on chiefdelphi brag about how easy it is and refuse to post code...
+		
 	 }
 
 
